@@ -36,10 +36,12 @@ public class AuthServiceTests
     public async Task RegisterAsync_ValidUser_ReturnsAuthResult()
     {
         // Arrange
+        var randomString = Guid.NewGuid().ToString().Split('-')[0];
         var registerDto = new RegisterDto
         {
-            Username = "testuser",
-            Email = "test@example.com",
+
+            Username = $"testuser{randomString}",
+            Email = $"test@example.com{randomString}",
             Password = "password123"
         };
 
@@ -156,4 +158,4 @@ public class AuthServiceTests
         // Act & Assert
         await Assert.ThrowsAsync<DbUpdateException>(() => _authService.RegisterAsync(registerDto));
     }
-} 
+}

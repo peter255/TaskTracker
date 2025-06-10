@@ -24,12 +24,20 @@ public class AuthService : IAuthService
 
     public async Task<AuthResultDto> RegisterAsync(RegisterDto dto)
     {
+
+        if (await _context.Users.AnyAsync(x => x.Username == dto.Username))
+        {
+            throw new DbUpdateException("Username Aleardy Exists!");
+        }
+
         var user = new User
         {
             Username = dto.Username,
             Email = dto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
         };
+
+
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();

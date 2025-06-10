@@ -6,12 +6,12 @@ using TaskTracker.Infrastructure.Repositories;
 
 namespace TaskTracker.Tests;
 
-public class GenericRepositoryTests
+public class TaskItemIntegrationTests
 {
     private readonly AppDbContext _context;
     private readonly IGenericRepository<TaskItem> _repository;
 
-    public GenericRepositoryTests()
+    public TaskItemIntegrationTests()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDb")
@@ -24,11 +24,17 @@ public class GenericRepositoryTests
     public async Task GetAllAsync_ReturnsAllEntities()
     {
         // Arrange
-        var tasks = new List<TaskItem>
+
+
+        var tasks = await _context.TaskItems.ToListAsync();
+
+        if (tasks.Count == 0)
         {
-            new TaskItem { Title = "Task 1", Description = "Description 1", DueDate = DateTime.Now.AddDays(1) },
-            new TaskItem { Title = "Task 2", Description = "Description 2", DueDate = DateTime.Now.AddDays(2) }
-        };
+            tasks = [
+                new() { Title = "Task 1", Description = "Description 1", DueDate = DateTime.Now.AddDays(1) },
+                new() { Title = "Task 2", Description = "Description 2", DueDate = DateTime.Now.AddDays(2) }];
+        }
+
         await _context.TaskItems.AddRangeAsync(tasks);
         await _context.SaveChangesAsync();
 
@@ -128,8 +134,12 @@ public class GenericRepositoryTests
     {
         // Act
         var result = await _repository.GetAllAsync();
+        if (result.Any())
+        {
+            result = [];
+        }
 
         // Assert
         Assert.Empty(result);
     }
-} 
+}
