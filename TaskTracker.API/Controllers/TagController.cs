@@ -49,7 +49,7 @@ public class TagController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTagDto dto)
     {
-        var tag = new Tag
+        var tag = new TaskTracker.Domain.Entities.Tag
         {
             Name = dto.Name
         };

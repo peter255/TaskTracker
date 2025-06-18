@@ -11,7 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<TaskGroup> TaskGroups => Set<TaskGroup>();
     public DbSet<TaskItem> TaskItems => Set<TaskItem>();
-    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<TaskTracker.Domain.Entities.Tag> Tags => Set<TaskTracker.Domain.Entities.Tag>();
     public DbSet<TaskTag> TaskTags => Set<TaskTag>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -7,6 +7,7 @@ using TaskTracker.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TaskTracker.Infrastructure.GraphQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services
+    .AddGraphQLServer()
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true)
+    .AddQueryType<Query>()
+    .AddProjections()
+    .AddFiltering()
+    .AddSorting();
 
 var app = builder.Build();
 
@@ -90,5 +98,5 @@ app.MapControllers();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapGraphQL();
 app.Run();

@@ -6,23 +6,23 @@ namespace TaskTracker.Infrastructure.Services;
 
 public class TagService : ITagService
 {
-    private readonly IGenericRepository<Tag> _repository;
+    private readonly IGenericRepository<TaskTracker.Domain.Entities.Tag> _repository;
 
-    public TagService(IGenericRepository<Tag> repository)
+    public TagService(IGenericRepository<TaskTracker.Domain.Entities.Tag> repository)
     {
         _repository = repository;
     }
 
-    public async Task<IEnumerable<Tag>> GetAllTagsAsync()
+    public async Task<IEnumerable<TaskTracker.Domain.Entities.Tag>> GetAllTagsAsync()
         => await _repository.GetAllAsync();
 
-    public async Task<Tag?> GetTagByIdAsync(int id)
+    public async Task<TaskTracker.Domain.Entities.Tag?> GetTagByIdAsync(int id)
         => await _repository.GetByIdAsync(id);
 
-    public async Task AddTagAsync(Tag tag)
+    public async Task AddTagAsync(TaskTracker.Domain.Entities.Tag tag)
         => await _repository.AddAsync(tag);
 
-    public async Task UpdateTagAsync(Tag tag)
+    public async Task UpdateTagAsync(TaskTracker.Domain.Entities.Tag tag)
         => _repository.Update(tag);
 
     public async Task DeleteTagAsync(int id)
