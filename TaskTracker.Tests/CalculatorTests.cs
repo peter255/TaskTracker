@@ -52,6 +52,8 @@ namespace TaskTracker.Tests
         [InlineData(2, 4)]
         [InlineData(4, 16)]
         [InlineData(8, 64)]
+        [InlineData(10, 100)]
+        [InlineData(5, 25)]
         public void Square_ValidInput_ReturnsSquare(int input, int expected)
         {
             // Arrange
