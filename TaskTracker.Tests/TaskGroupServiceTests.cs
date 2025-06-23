@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Moq;
+using TaskTracker.Application.DTOs;
 using TaskTracker.Application.Interfaces.Repositories;
 using TaskTracker.Application.Interfaces.Services;
 using TaskTracker.Domain.Entities;
@@ -8,13 +10,15 @@ namespace TaskTracker.Tests;
 
 public class TaskGroupServiceTests
 {
-    private readonly Mock<IGenericRepository<TaskGroup>> _mockRepo;
+    private readonly Mock<ITaskGroupRepository> _mockRepo;
     private readonly ITaskGroupService _taskGroupService;
+    private readonly Mock<IHttpContextAccessor> _mckHttpContextAccessor;
 
     public TaskGroupServiceTests()
     {
-        _mockRepo = new Mock<IGenericRepository<TaskGroup>>();
-        _taskGroupService = new TaskGroupService(_mockRepo.Object);
+        _mockRepo = new Mock<ITaskGroupRepository>();
+        _mckHttpContextAccessor = new Mock<IHttpContextAccessor>();
+        _taskGroupService = new TaskGroupService(_mockRepo.Object, _mckHttpContextAccessor.Object);
     }
 
     [Fact]
@@ -85,26 +89,26 @@ public class TaskGroupServiceTests
     public async Task AddGroupAsync_CallsRepositoryAddAsync()
     {
         // Arrange
-        var group = new TaskGroup { Name = "New Group", UserId = 1 };
+        var group = new CreateTaskGroupDto { Name = "New Group" };
 
         // Act
         await _taskGroupService.AddGroupAsync(group);
 
         // Assert
-        _mockRepo.Verify(x => x.AddAsync(group), Times.Once);
+        _mockRepo.Verify(x => x.AddAsync(new TaskGroup { Name= group.Name}), Times.Once);
     }
 
     [Fact]
     public async Task UpdateGroupAsync_CallsRepositoryUpdate()
     {
         // Arrange
-        var group = new TaskGroup { Id = 1, Name = "Updated Group", UserId = 1 };
+        var group = new UpdateTaskGroupDto { Id = 1, Name = "Updated Group" };
 
         // Act
         await _taskGroupService.UpdateGroupAsync(group);
 
         // Assert
-        _mockRepo.Verify(x => x.Update(group), Times.Once);
+        _mockRepo.Verify(x => x.Update(new TaskGroup { Name = group.Name }), Times.Once);
     }
 
     [Fact]

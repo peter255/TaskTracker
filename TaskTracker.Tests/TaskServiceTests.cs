@@ -1,9 +1,11 @@
-﻿using Moq;
+﻿using Microsoft.AspNetCore.Http;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaskTracker.Application.DTOs;
 using TaskTracker.Application.Interfaces.Repositories;
 using TaskTracker.Application.Interfaces.Services;
 using TaskTracker.Domain.Entities;
@@ -13,13 +15,15 @@ namespace TaskTracker.Tests
 {
     public class TaskServiceTests
     {
-        private readonly Mock<IGenericRepository<TaskItem>> _mockRepo;
+        private readonly Mock<ITaskRepository> _mockRepo;
         private readonly ITaskService _taskService;
+        private readonly Mock<IHttpContextAccessor> _mockHttpContext;
 
         public TaskServiceTests()
         {
-            _mockRepo = new Mock<IGenericRepository<TaskItem>>();
-            _taskService = new TaskService(_mockRepo.Object);
+            _mockRepo = new Mock<ITaskRepository>();
+            _mockHttpContext = new Mock<IHttpContextAccessor>();
+            _taskService = new TaskService(_mockRepo.Object, _mockHttpContext.Object);
         }
 
         [Fact]
@@ -48,8 +52,8 @@ namespace TaskTracker.Tests
         [Fact]
         public async Task GetAllTasksAsync_ReturnsEmptyList()
         {
-            _mockRepo.Setup(x=> x.GetAllAsync()).ReturnsAsync([]);
-           var result= await _taskService.GetAllTasksAsync();
+            _mockRepo.Setup(x => x.GetAllAsync()).ReturnsAsync([]);
+            var result = await _taskService.GetAllTasksAsync();
             Assert.Empty(result);
         }
 
@@ -74,18 +78,18 @@ namespace TaskTracker.Tests
         [Fact]
         public async Task AddTaskAsync_CallsRepositoryAddTaskAsync()
         {
-            var task = new TaskItem { Id = 1, Title = "Add New" };
+            var task = new CreateTaskItemDto { Title = "Add New" };
             await _taskService.AddTaskAsync(task);
-            _mockRepo.Verify(x => x.AddAsync(task), Times.Once);
+            _mockRepo.Verify(x => x.AddAsync(new TaskItem { Title = "Add New" }), Times.Once);
         }
 
         [Fact]
         public async Task UpdateTaskAsync_CallsRepositoryUpdateTaskAsync()
         {
-            var task = new TaskItem { Id = 1, Title = "Update Task Title" };
+            var task = new UpdateTaskItemDto { Id = 1, Title = "Update Task Title" };
             await _taskService.UpdateTaskAsync(task);
 
-            _mockRepo.Verify(x => x.Update(task), Times.Once);
+            _mockRepo.Verify(x => x.Update(new TaskItem { Id = 1, Title = "Update Task Title" }), Times.Once);
         }
 
         [Fact]
