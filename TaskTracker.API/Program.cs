@@ -1,13 +1,15 @@
-﻿using TaskTracker.Infrastructure.Persistence;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using TaskTracker.Application.Interfaces.Repositories;
-using TaskTracker.Application.Interfaces.Services;
-using TaskTracker.Infrastructure.Repositories;
-using TaskTracker.Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TaskTracker.Infrastructure.GraphQL;
+using TaskTracker.API.GraphQL.Mutations;
+using TaskTracker.API.GraphQL.Queries;
+using TaskTracker.Application.Interfaces.Repositories;
+using TaskTracker.Application.Interfaces.Services;
+using TaskTracker.Infrastructure.Persistence;
+using TaskTracker.Infrastructure.Repositories;
+using TaskTracker.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,13 +58,35 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddHttpContextAccessor();
 
+//Repositories DI
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<ITaskGroupRepository, TaskGroupRepository>();
+
+//Services DI
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ITaskGroupService, TaskGroupService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+
+
+
+builder.Services
+    .AddGraphQLServer()
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true)
+    .AddQueryType(d => d.Name("Query"))
+    .AddType<TaskItemQuery>()
+    //.AddType<TagQuery>()
+    //.AddType<TaskGroupQuery>()
+    //.AddMutationType(d => d.Name("Mutation"))
+    //.AddType<TagMutation>()
+    //.AddType<TaskGroupMutation>()
+    .AddProjections()
+    .AddFiltering()
+    .AddSorting();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -79,13 +103,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services
-    .AddGraphQLServer()
-    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = true)
-    .AddQueryType<Query>()
-    .AddProjections()
-    .AddFiltering()
-    .AddSorting();
+
 
 var app = builder.Build();
 

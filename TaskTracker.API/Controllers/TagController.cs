@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Application.DTOs;
 using TaskTracker.Application.Interfaces.Services;
-using TaskTracker.Domain.Entities;
 
 namespace TaskTracker.API.Controllers;
 
@@ -49,13 +48,7 @@ public class TagController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTagDto dto)
     {
-        var tag = new TaskTracker.Domain.Entities.Tag
-        {
-            Name = dto.Name
-        };
-
-        await _tagService.AddTagAsync(tag);
-        return Ok(new { message = "Tag created", tag.Id });
+        return await _tagService.AddTagAsync(dto) ? Ok(new { message = "Tag created" }) : StatusCode(500);
     }
 
     [HttpPut("{id}")]
@@ -64,14 +57,9 @@ public class TagController : ControllerBase
         if (id != dto.Id)
             return BadRequest();
 
-        var existing = await _tagService.GetTagByIdAsync(id);
-        if (existing is null)
-            return NotFound();
+        return await _tagService.UpdateTagAsync(dto) ? Ok(new { message = "Tag Updated" }) : StatusCode(500);
 
-        existing.Name = dto.Name;
-        await _tagService.UpdateTagAsync(existing);
 
-        return NoContent();
     }
 
     [HttpDelete("{id}")]
@@ -81,7 +69,7 @@ public class TagController : ControllerBase
         if (tag is null)
             return NotFound();
 
-        await _tagService.DeleteTagAsync(id);
-        return NoContent();
+      return  await _tagService.DeleteTagAsync(id) ? Ok(new { message = "Tag Deleted" }) : StatusCode(500);
+
     }
 }
